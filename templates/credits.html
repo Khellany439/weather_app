@@ -1,0 +1,192 @@
+{% extends 'layout.html' %}
+
+{% block title %}Credits - Weather Information Cloud Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-coins me-2"></i>Credits Management
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 bg-dark">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="card-title mb-0">
+                                    <i class="fas fa-wallet me-2"></i>Your Balance
+                                </h3>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="display-1 mb-3">
+                                    <span class="badge bg-success p-3">
+                                        <i class="fas fa-coins me-2"></i>{{ current_user.credits }}
+                                    </span>
+                                </div>
+                                <p class="lead">Available Credits</p>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>Credits are used to access weather data:
+                                    <ul class="mb-0 mt-2 text-start">
+                                        <li>Current Weather: 1 credit</li>
+                                        <li>Weather Forecast: 2 credits</li>
+                                        <li>Historical Weather: 3 credits</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 bg-dark">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="card-title mb-0">
+                                    <i class="fas fa-shopping-cart me-2"></i>Purchase Credits
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('purchase_credits') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    
+                                    <div class="mb-3">
+                                        <label for="credit_package" class="form-label">Select Package</label>
+                                        <select class="form-select" id="credit_package" name="amount" required>
+                                            <option value="10">10 Credits ($1.99)</option>
+                                            <option value="50">50 Credits ($8.99)</option>
+                                            <option value="100">100 Credits ($14.99)</option>
+                                            <option value="500">500 Credits ($59.99)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="payment_method" class="form-label">Payment Method</label>
+                                        <select class="form-select" id="payment_method" name="payment_method" required>
+                                            <option value="credit_card">Credit Card</option>
+                                            <option value="paypal">PayPal</option>
+                                            <option value="crypto">Cryptocurrency</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-shopping-cart me-2"></i>Purchase Credits
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <hr>
+                                
+                                <form method="POST" action="{{ url_for('redeem_promo') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    
+                                    <div class="mb-3">
+                                        <label for="promo_code" class="form-label">Redeem Promo Code</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="promo_code" name="promo_code" placeholder="Enter code" required>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-gift me-2"></i>Redeem
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card bg-dark">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="card-title mb-0">
+                                    <i class="fas fa-history me-2"></i>Transaction History
+                                </h3>
+                            </div>
+                            <div class="card-body p-0">
+                                {% if transactions %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Date</th>
+                                                <th>Description</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for transaction in transactions %}
+                                            <tr>
+                                                <td>{{ transaction.id }}</td>
+                                                <td>{% if transaction.created_at %}{{ transaction.created_at if transaction.created_at is string else transaction.created_at.strftime('%Y-%m-%d %H:%M') }}{% else %}Unknown{% endif %}</td>
+                                                <td>{{ transaction.description }}</td>
+                                                <td class="{% if transaction.amount > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                    {% if transaction.amount > 0 %}
+                                                    <i class="fas fa-plus-circle me-1"></i>
+                                                    {% else %}
+                                                    <i class="fas fa-minus-circle me-1"></i>
+                                                    {% endif %}
+                                                    {{ transaction.amount }} credits
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-5">
+                                    <div class="display-1 text-muted mb-3">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <h3>No Transactions Yet</h3>
+                                    <p class="lead">Your credit transaction history will appear here.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% if transactions and pages > 1 %}
+                            <div class="card-footer">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        {% if page > 1 %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('credits', page=page-1) }}">
+                                                <i class="fas fa-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+                                        </li>
+                                        {% endif %}
+                                        
+                                        {% for p in range(1, pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a class="page-link" href="{{ url_for('credits', page=p) }}">{{ p }}</a>
+                                        </li>
+                                        {% endfor %}
+                                        
+                                        {% if page < pages %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('credits', page=page+1) }}">
+                                                Next <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

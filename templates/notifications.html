@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+
+{% block title %}Notifications - Weather Information Cloud Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h2>
+                    <div>
+                        {% if notifications %}
+                        <form method="POST" action="{{ url_for('mark_all_read') }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-light">
+                                <i class="fas fa-check-double me-2"></i>Mark All Read
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-primary ms-2">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for notification in notifications %}
+                    <div class="list-group-item list-group-item-action bg-dark {% if not notification.is_read %}border-start border-5 border-info{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    {% if notification.is_read %}
+                                    <div class="me-3 text-muted">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="me-3 text-info">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="mb-1">{{ notification.message }}</p>
+                                        <small class="text-muted">{% if notification.created_at is string %}{{ notification.created_at }}{% else %}{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                {% if notification.request_id %}
+                                <a href="{{ url_for('view_request', request_id=notification.request_id) }}" class="btn btn-sm btn-outline-info me-2">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% endif %}
+                                
+                                <form method="POST" action="{{ url_for('update_notification', notification_id=notification.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="is_read" value="{{ not notification.is_read }}">
+                                    
+                                    {% if notification.is_read %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                    {% else %}
+                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted mb-3">
+                        <i class="fas fa-bell-slash"></i>
+                    </div>
+                    <h3>No Notifications</h3>
+                    <p class="lead">You don't have any notifications yet.</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-tachometer-alt me-2"></i>Return to Dashboard
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% if notifications and pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('notifications', page=page-1) }}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for p in range(1, pages + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('notifications', page=p) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if page < pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('notifications', page=page+1) }}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

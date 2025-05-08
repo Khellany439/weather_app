@@ -1,0 +1,287 @@
+{% extends 'layout.html' %}
+
+{% block title %}Weather Search - Weather Information Cloud Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header bg-info text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-search-location me-2"></i>Weather Search
+                </h2>
+            </div>
+            <div class="card-body">
+                <form id="weatherSearchForm" method="POST" action="{{ url_for('weather_search') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                    placeholder="City name, address, or coordinates" required>
+                            </div>
+                            <div class="form-text">Enter a city name, address, or geographic coordinates.</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="request_type" class="form-label">Request Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-list"></i></span>
+                                <select class="form-select" id="request_type" name="request_type" required>
+                                    <option value="current">Current Weather (1 credit)</option>
+                                    <option value="forecast">5-Day Forecast (2 credits)</option>
+                                    <option value="historical">Historical Data (3 credits)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" id="forecastDaysContainer" style="display: none;">
+                            <label for="forecast_days" class="form-label">Forecast Days</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                <select class="form-select" id="forecast_days" name="forecast_days">
+                                    <option value="1">1 Day</option>
+                                    <option value="2">2 Days</option>
+                                    <option value="3">3 Days</option>
+                                    <option value="4">4 Days</option>
+                                    <option value="5" selected>5 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" id="historicalDateContainer" style="display: none;">
+                            <label for="historical_date" class="form-label">Historical Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                <input type="date" class="form-control" id="historical_date" name="historical_date">
+                            </div>
+                            <div class="form-text">Select a date within the last 5 years.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3" id="creditInfo">
+                        <i class="fas fa-info-circle me-2"></i> This request will use <span id="creditCost">1</span> credit(s). You have <strong>{{ current_user.credits }}</strong> credits available.
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary" id="searchButton">
+                            <i class="fas fa-search me-2"></i>Search Weather
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if result %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-cloud-sun me-2"></i>Weather Results for {{ result.location }}
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if request_type == 'current' %}
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <div class="d-flex align-items-center">
+                            <img src="https://openweathermap.org/img/wn/{{ result.icon }}@2x.png" alt="{{ result.description }}" class="weather-icon me-3">
+                            <div>
+                                <h2 class="mb-0">{{ "%.1f"|format(result.temperature) }}°C</h2>
+                                <p class="text-capitalize mb-0">{{ result.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mt-4 mt-md-0">
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-water fa-fw me-2 text-info"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Humidity</small>
+                                        <span>{{ result.humidity }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-wind fa-fw me-2 text-info"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Wind Speed</small>
+                                        <span>{{ result.wind_speed }} m/s</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-temperature-high fa-fw me-2 text-info"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Pressure</small>
+                                        <span>{{ result.pressure }} hPa</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-eye fa-fw me-2 text-info"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Visibility</small>
+                                        <span>{% if result.visibility is defined %}{{ result.visibility // 1000 }} km{% else %}Not available{% endif %}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <p class="text-center mb-0">
+                    <small class="text-muted">Last updated: {% if result.timestamp is defined %}{{ result.timestamp.strftime('%Y-%m-%d %H:%M:%S') if result.timestamp is not string else result.timestamp }}{% else %}N/A{% endif %}</small>
+                </p>
+                
+                {% elif request_type == 'forecast' %}
+                <div class="row">
+                    {% for day in result.forecast %}
+                    <div class="col-md-{{ 12 // result.forecast|length }}">
+                        <div class="card mb-3 bg-dark">
+                            <div class="card-header text-center">
+                                <h5 class="card-title mb-0">{% if day.date is string %}{{ day.date }}{% else %}{{ day.date.strftime('%a, %b %d') }}{% endif %}</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <img src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png" alt="{{ day.description }}" class="weather-icon">
+                                <h4>{{ "%.1f"|format(day.temperature) }}°C</h4>
+                                <p class="text-capitalize mb-0">{{ day.description }}</p>
+                                <div class="mt-2">
+                                    <small class="d-block"><i class="fas fa-water fa-fw me-1 text-info"></i> Humidity: {{ day.humidity }}%</small>
+                                    <small class="d-block"><i class="fas fa-wind fa-fw me-1 text-info"></i> Wind: {{ day.wind_speed }} m/s</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% elif request_type == 'historical' %}
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="card bg-dark">
+                            <div class="card-header text-center">
+                                <h4 class="card-title mb-0">{% if result.date is string %}{{ result.date }}{% else %}{{ result.date.strftime('%A, %B %d, %Y') }}{% endif %}</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6 text-center">
+                                        <img src="https://openweathermap.org/img/wn/{{ result.icon }}@2x.png" alt="{{ result.description }}" class="weather-icon mb-2">
+                                        <h3>{{ "%.1f"|format(result.temperature) }}°C</h3>
+                                        <p class="text-capitalize">{{ result.description }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item bg-dark">
+                                                <i class="fas fa-temperature-high fa-fw me-2 text-info"></i> 
+                                                <span>Max Temp: {{ "%.1f"|format(result.temp_max) }}°C</span>
+                                            </li>
+                                            <li class="list-group-item bg-dark">
+                                                <i class="fas fa-temperature-low fa-fw me-2 text-info"></i> 
+                                                <span>Min Temp: {{ "%.1f"|format(result.temp_min) }}°C</span>
+                                            </li>
+                                            <li class="list-group-item bg-dark">
+                                                <i class="fas fa-water fa-fw me-2 text-info"></i> 
+                                                <span>Humidity: {{ result.humidity }}%</span>
+                                            </li>
+                                            <li class="list-group-item bg-dark">
+                                                <i class="fas fa-wind fa-fw me-2 text-info"></i> 
+                                                <span>Wind Speed: {{ result.wind_speed }} m/s</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('weather_search') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-search me-2"></i>New Search
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <span class="badge bg-secondary p-2">
+                            <i class="fas fa-coins me-1"></i> {{ credits_used }} credit(s) used
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const requestTypeSelect = document.getElementById('request_type');
+        const forecastDaysContainer = document.getElementById('forecastDaysContainer');
+        const historicalDateContainer = document.getElementById('historicalDateContainer');
+        const creditCostSpan = document.getElementById('creditCost');
+        const historicalDate = document.getElementById('historical_date');
+        
+        // Set default max date for historical weather (today)
+        const today = new Date();
+        const fiveYearsAgo = new Date();
+        fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+        
+        historicalDate.max = today.toISOString().split('T')[0];
+        historicalDate.min = fiveYearsAgo.toISOString().split('T')[0];
+        historicalDate.value = new Date(today.getTime() - 24*60*60*1000).toISOString().split('T')[0]; // Yesterday
+        
+        // Update form based on request type
+        requestTypeSelect.addEventListener('change', function() {
+            const requestType = this.value;
+            
+            // Hide all containers first
+            forecastDaysContainer.style.display = 'none';
+            historicalDateContainer.style.display = 'none';
+            
+            // Show relevant container and update credit cost
+            if (requestType === 'current') {
+                creditCostSpan.textContent = '1';
+            } else if (requestType === 'forecast') {
+                forecastDaysContainer.style.display = 'block';
+                creditCostSpan.textContent = '2';
+            } else if (requestType === 'historical') {
+                historicalDateContainer.style.display = 'block';
+                creditCostSpan.textContent = '3';
+            }
+        });
+        
+        // Validate form submission
+        document.getElementById('weatherSearchForm').addEventListener('submit', function(event) {
+            const requestType = requestTypeSelect.value;
+            const userCredits = {{ current_user.credits }};
+            let requiredCredits = 1;
+            
+            if (requestType === 'forecast') {
+                requiredCredits = 2;
+            } else if (requestType === 'historical') {
+                requiredCredits = 3;
+            }
+            
+            if (userCredits < requiredCredits) {
+                event.preventDefault();
+                alert(`You don't have enough credits for this request. You need ${requiredCredits} credits, but you only have ${userCredits}.`);
+            }
+        });
+    });
+</script>
+{% endblock %}

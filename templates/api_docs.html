@@ -1,0 +1,249 @@
+{% extends 'layout.html' %}
+
+{% block title %}API Documentation - Weather Information Cloud Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header bg-secondary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-code me-2"></i>API Documentation
+                    </h2>
+                    <a href="{{ url_for('swagger_ui') }}" class="btn btn-sm btn-info" target="_blank">
+                        <i class="fas fa-external-link-alt me-2"></i>Interactive API Docs
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Our API is built with FastAPI and provides weather information for any location. You can access current weather, forecasts, and historical data.
+                </div>
+                
+                <h3 class="mt-4 mb-3">Authentication</h3>
+                <p>All API endpoints require authentication with a JWT token. To obtain a token, use the login endpoint.</p>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <span class="badge bg-success me-2">POST</span>/api/token
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Request</h5>
+                        <p>Send a form with username and password to receive an access token.</p>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "username": "your_username",
+  "password": "your_password"
+}</code></pre>
+                        
+                        <h5 class="mt-3">Response</h5>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}</code></pre>
+                        
+                        <h5 class="mt-3">Example</h5>
+                        <pre class="bg-dark p-3 rounded"><code>curl -X POST "http://weathercloud.example.com/api/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=your_username&password=your_password"</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-5 mb-3">Weather Endpoints</h3>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <span class="badge bg-primary me-2">GET</span>/api/weather/current/{location}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Get current weather data for a specific location. This endpoint uses 1 credit per request.</p>
+                        
+                        <h5>Parameters</h5>
+                        <ul>
+                            <li><strong>location</strong> (path parameter): City name, address, or coordinates</li>
+                        </ul>
+                        
+                        <h5 class="mt-3">Response</h5>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "location": "London",
+  "temperature": 15.2,
+  "humidity": 76,
+  "wind_speed": 4.1,
+  "description": "scattered clouds",
+  "icon": "03d",
+  "timestamp": "2025-05-07T14:30:00"
+}</code></pre>
+                        
+                        <h5 class="mt-3">Example</h5>
+                        <pre class="bg-dark p-3 rounded"><code>curl -X GET "http://weathercloud.example.com/api/weather/current/london" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <span class="badge bg-primary me-2">GET</span>/api/weather/forecast/{location}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Get a weather forecast for a specific location. This endpoint uses 2 credits per request.</p>
+                        
+                        <h5>Parameters</h5>
+                        <ul>
+                            <li><strong>location</strong> (path parameter): City name, address, or coordinates</li>
+                            <li><strong>days</strong> (query parameter, optional): Number of days for forecast (default: 5, max: 5)</li>
+                        </ul>
+                        
+                        <h5 class="mt-3">Response</h5>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "location": "London",
+  "forecast": [
+    {
+      "date": "2025-05-07T12:00:00",
+      "temperature": 15.2,
+      "humidity": 76,
+      "wind_speed": 4.1,
+      "description": "scattered clouds",
+      "icon": "03d"
+    },
+    {
+      "date": "2025-05-08T12:00:00",
+      "temperature": 16.8,
+      "humidity": 68,
+      "wind_speed": 3.5,
+      "description": "clear sky",
+      "icon": "01d"
+    },
+    ...
+  ]
+}</code></pre>
+                        
+                        <h5 class="mt-3">Example</h5>
+                        <pre class="bg-dark p-3 rounded"><code>curl -X GET "http://weathercloud.example.com/api/weather/forecast/london?days=3" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <span class="badge bg-primary me-2">GET</span>/api/weather/historical/{location}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Get historical weather data for a specific location. This endpoint uses 3 credits per request.</p>
+                        
+                        <h5>Parameters</h5>
+                        <ul>
+                            <li><strong>location</strong> (path parameter): City name, address, or coordinates</li>
+                            <li><strong>date</strong> (query parameter): Date for historical data (format: YYYY-MM-DD)</li>
+                        </ul>
+                        
+                        <h5 class="mt-3">Response</h5>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "location": "London",
+  "date": "2025-05-01",
+  "temperature": 14.5,
+  "temp_min": 10.2,
+  "temp_max": 17.8,
+  "humidity": 71,
+  "wind_speed": 3.8,
+  "description": "light rain",
+  "icon": "10d"
+}</code></pre>
+                        
+                        <h5 class="mt-3">Example</h5>
+                        <pre class="bg-dark p-3 rounded"><code>curl -X GET "http://weathercloud.example.com/api/weather/historical/london?date=2025-05-01" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-5 mb-3">User and Credits Endpoints</h3>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <span class="badge bg-primary me-2">GET</span>/api/users/me
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Get information about the current authenticated user.</p>
+                        
+                        <h5 class="mt-3">Response</h5>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "id": 123,
+  "username": "your_username",
+  "email": "user@example.com",
+  "credits": 42,
+  "is_active": true,
+  "created_at": "2025-01-15T10:30:00"
+}</code></pre>
+                        
+                        <h5 class="mt-3">Example</h5>
+                        <pre class="bg-dark p-3 rounded"><code>curl -X GET "http://weathercloud.example.com/api/users/me" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card bg-dark mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <span class="badge bg-primary me-2">GET</span>/api/credits/balance
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Get the current user's credit balance.</p>
+                        
+                        <h5 class="mt-3">Response</h5>
+                        <pre class="bg-dark p-3 rounded"><code>{
+  "credits": 42
+}</code></pre>
+                        
+                        <h5 class="mt-3">Example</h5>
+                        <pre class="bg-dark p-3 rounded"><code>curl -X GET "http://weathercloud.example.com/api/credits/balance" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <h3 class="mb-3">Error Responses</h3>
+                    <p>All API endpoints use standard HTTP status codes to indicate success or failure:</p>
+                    <ul>
+                        <li><strong>200 OK</strong>: Request successful</li>
+                        <li><strong>400 Bad Request</strong>: Invalid request parameters</li>
+                        <li><strong>401 Unauthorized</strong>: Authentication required or invalid</li>
+                        <li><strong>403 Forbidden</strong>: Insufficient credits or permissions</li>
+                        <li><strong>404 Not Found</strong>: Resource not found</li>
+                        <li><strong>500 Internal Server Error</strong>: Unexpected server error</li>
+                    </ul>
+                    
+                    <p>Error responses have the following format:</p>
+                    <pre class="bg-dark p-3 rounded"><code>{
+  "detail": "Error message describing the issue"
+}</code></pre>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <a href="{{ url_for('swagger_ui') }}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-code me-2"></i>Interactive API Docs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

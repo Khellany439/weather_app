@@ -1,0 +1,183 @@
+{% extends 'layout.html' %}
+
+{% block title %}Dashboard - Weather Information Cloud Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1 class="card-title mb-3">Welcome, {{ current_user.username }}!</h1>
+                        <p class="lead">Access your personalized weather information and account status.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-end">
+                            <div class="me-md-4 mb-3 mb-md-0">
+                                <span class="badge bg-success p-2 credit-badge">
+                                    <i class="fas fa-coins me-2"></i>{{ current_user.credits }} Credits
+                                </span>
+                            </div>
+                            <a href="{{ url_for('credits') }}" class="btn btn-outline-info">
+                                <i class="fas fa-plus-circle me-2"></i>Get More Credits
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 mb-4 mb-md-0">
+        <div class="card h-100 weather-info-card shadow-lg bg-custom-dark">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-search-location me-2"></i>Weather Search
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Search for current weather conditions, forecasts, or historical data for any location worldwide.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('weather_search') }}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Search Weather
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small><i class="fas fa-info-circle me-1"></i>Get accurate weather data using your credits</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100 request-history-card shadow-lg bg-custom-dark">
+            <div class="card-header bg-warning text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-history me-2"></i>Request History
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">View your recent weather data requests, including status and results.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('request_history') }}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>View History
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small><i class="fas fa-info-circle me-1"></i>Access your past weather data requests</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 mb-4 mb-md-0">
+        <div class="card h-100 credit-card shadow-lg bg-custom-dark">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-coins me-2"></i>Credits
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Purchase more credits to continue using our weather data services.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('credits') }}" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart me-2"></i>Manage Credits
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small><i class="fas fa-info-circle me-1"></i>View your transaction history and purchase options</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100 bg-custom-dark shadow-lg">
+            <div class="card-header bg-secondary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-code me-2"></i>API Access
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Get information about our API for direct integration with your applications.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('api_docs') }}" class="btn btn-primary">
+                        <i class="fas fa-book me-2"></i>API Documentation
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small><i class="fas fa-info-circle me-1"></i>Learn how to use our weather API programmatically</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if recent_requests %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header">
+                <h3 class="card-title mb-0"><i class="fas fa-clock me-2"></i>Recent Requests</h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in recent_requests %}
+                            <tr>
+                                <td>{{ request.location }}</td>
+                                <td>
+                                    {% if request.request_type == 'current' %}
+                                    <span class="badge bg-primary">Current</span>
+                                    {% elif request.request_type == 'forecast' %}
+                                    <span class="badge bg-warning">Forecast</span>
+                                    {% elif request.request_type == 'historical' %}
+                                    <span class="badge bg-info">Historical</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if request.status == 'queued' %}
+                                    <span class="badge bg-secondary">Queued</span>
+                                    {% elif request.status == 'processing' %}
+                                    <span class="badge bg-info">Processing</span>
+                                    {% elif request.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                    {% elif request.status == 'failed' %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>{% if request.created_at %}{{ request.created_at if request.created_at is string else request.created_at.strftime('%Y-%m-%d %H:%M') }}{% else %}Unknown{% endif %}</td>
+                                <td>
+                                    <a href="{{ url_for('view_request', request_id=request.id) }}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('request_history') }}" class="btn btn-outline-primary">View All Requests</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

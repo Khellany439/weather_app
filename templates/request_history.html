@@ -1,0 +1,124 @@
+{% extends 'layout.html' %}
+
+{% block title %}Request History - Weather Information Cloud Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-custom-dark shadow-lg">
+            <div class="card-header bg-warning text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Request History
+                    </h2>
+                    <a href="{{ url_for('weather_search') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-search me-2"></i>New Weather Search
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if requests %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Credits Used</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in requests %}
+                            <tr>
+                                <td>{{ request.id }}</td>
+                                <td>{{ request.location }}</td>
+                                <td>
+                                    {% if request.request_type == 'current' %}
+                                    <span class="badge bg-primary">Current</span>
+                                    {% elif request.request_type == 'forecast' %}
+                                    <span class="badge bg-warning">Forecast</span>
+                                    {% elif request.request_type == 'historical' %}
+                                    <span class="badge bg-info">Historical</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if request.status == 'queued' %}
+                                    <span class="badge bg-secondary">Queued</span>
+                                    {% elif request.status == 'processing' %}
+                                    <span class="badge bg-info">Processing</span>
+                                    {% elif request.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                    {% elif request.status == 'failed' %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ request.credits_used }}</td>
+                                <td>{% if request.created_at %}{{ request.created_at if request.created_at is string else request.created_at.strftime('%Y-%m-%d %H:%M') }}{% else %}Unknown{% endif %}</td>
+                                <td>
+                                    <a href="{{ url_for('view_request', request_id=request.id) }}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted mb-3">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>No Weather Requests Yet</h3>
+                    <p class="lead">You haven't made any weather data requests.</p>
+                    <a href="{{ url_for('weather_search') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-search-location me-2"></i>Search Weather
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% if requests and pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('request_history', page=page-1) }}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for p in range(1, pages + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('request_history', page=p) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if page < pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('request_history', page=page+1) }}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'layout.html' %}
+
+{% block title %}Weather Information Cloud Service - Home{% endblock %}
+
+{% block content %}
+<div class="row align-items-center my-5">
+    <div class="col-lg-7">
+        <div class="mb-4">
+            <h1 class="display-4 fw-bold text-primary mb-3">Weather Information Cloud Service</h1>
+            <p class="lead">Get accurate and up-to-date weather information for any location around the world. Our cloud-based API provides current conditions, forecasts, and historical data.</p>
+            <p>Powered by FastAPI, our service is fast, reliable, and easy to use. Register for an account to get started with your free credits.</p>
+            <div class="mt-4">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                </a>
+                {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card bg-dark shadow-lg p-3">
+            <div class="card-body text-center">
+                <div class="display-1 mb-3 text-info">
+                    <i class="fas fa-cloud-sun-rain"></i>
+                </div>
+                <h2 class="card-title">Weather at Your Fingertips</h2>
+                <p class="card-text">Access weather data through a simple, intuitive interface or our powerful API.</p>
+                <a href="{{ url_for('api_docs') }}" class="btn btn-info mt-2">
+                    <i class="fas fa-code me-2"></i>API Documentation
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-4">Key Features</h2>
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    <div class="col-md-4">
+        <div class="card h-100 bg-custom-dark">
+            <div class="card-body text-center">
+                <div class="display-4 text-primary mb-3">
+                    <i class="fas fa-thermometer-half"></i>
+                </div>
+                <h3 class="card-title h4">Current Weather</h3>
+                <p class="card-text">Get real-time weather conditions including temperature, humidity, wind speed, and more for any location worldwide.</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <span class="badge bg-secondary">1 Credit</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 bg-custom-dark">
+            <div class="card-body text-center">
+                <div class="display-4 text-warning mb-3">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3 class="card-title h4">Forecast</h3>
+                <p class="card-text">Look ahead with 5-day weather forecasts to plan your activities with confidence and stay prepared.</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <span class="badge bg-secondary">2 Credits</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 bg-custom-dark">
+            <div class="card-body text-center">
+                <div class="display-4 text-info mb-3">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3 class="card-title h4">Historical Data</h3>
+                <p class="card-text">Access historical weather data to analyze patterns and trends for research or planning purposes.</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <span class="badge bg-secondary">3 Credits</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-gradient-primary text-light p-4">
+            <div class="card-body text-center">
+                <h2 class="card-title mb-3">Ready to Get Started?</h2>
+                <p class="card-text lead">Register today and receive 10 free credits to explore our weather services.</p>
+                <div class="mt-3">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('weather_search') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-search-location me-2"></i>Search Weather Now
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Create Your Account
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

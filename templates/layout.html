@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Weather Information Cloud Service{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        .weather-icon {
+            width: 64px;
+            height: 64px;
+        }
+        .credit-badge {
+            font-size: 1.2rem;
+        }
+        .bg-custom-dark {
+            background-color: rgba(40, 44, 52, 0.95);
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .notification-badge {
+            position: relative;
+            top: -8px;
+            right: 5px;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(to right, var(--bs-info), var(--bs-primary));
+        }
+        .weather-info-card {
+            border-left: 5px solid var(--bs-info);
+        }
+        .request-history-card {
+            border-left: 5px solid var(--bs-warning);
+        }
+        .credit-card {
+            border-left: 5px solid var(--bs-success);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    {% include 'includes/navbar.html' %}
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p>&copy; {{ now().year }} Weather Information Cloud Service. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enable Bootstrap tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Add CSRF token to AJAX requests
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+            }
+        });
+        
+        // Function to show confirmation dialogs
+        function confirmAction(event, message) {
+            if (!confirm(message)) {
+                event.preventDefault();
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <!-- Page-specific JavaScript -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
