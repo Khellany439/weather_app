@@ -61,14 +61,7 @@ $env:SECRET_KEY="your_secret_key"
 
 ## Running the Application
 
-### Method 1: All-in-One Script (Recommended for Windows)
-
-```bash
-# This runs both Flask and FastAPI components
-python run_windows.py
-```
-
-### Method 2: Running Components Separately
+### Running Components Separately
 
 **Terminal 1: Start FastAPI Backend**
 ```bash
